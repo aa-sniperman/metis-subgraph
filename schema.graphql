@@ -1,0 +1,8 @@
+type TokenCreation @entity {
+  id: Bytes!
+  tokenAddress: Bytes!
+  recipient: Bytes!
+  amount: BigInt!
+  timestamp: BigInt!
+  transactionHash: Bytes!
+}
