@@ -11,7 +11,7 @@ import { Address, BigInt } from "@graphprotocol/graph-ts"
 import { handleTokenHoldingChange, handleTokenTransfer } from "../src/mappings/erc20"
 import { createTransferEvent } from "./erc20-utils"
 import { createAndStoreTestToken, createAndStoreTestTokenHolding, TokenFixture } from "./constants"
-import { Token } from "../generated/schema"
+import { Token, TokenHolder } from "../generated/schema"
 
 // Test structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
@@ -25,26 +25,17 @@ const token1Fixture: TokenFixture = {
   totalSupply: "0",
   decimals: "9"
 }
-
-const token2Address = Address.fromString("0xea32a96608495e54156ae48931a7c20f0dcc1a21")
-
-const token2Fixture: TokenFixture = {
-  address: '0xea32a96608495e54156ae48931a7c20f0dcc1a21',
-  symbol: "WRXDIE",
-  name: "Wrxdie on the mic",
-  totalSupply: "0",
-  decimals: "18"
-}
-
 const holder1 = Address.fromString("0xEB5491C015b73C3B86F4B4a7E8982d97eC4628ff");
 const holder2 = Address.fromString("0xA00a593B4160Fc26aF93Cf5bd88ab475228aaaC5");
+const holder1Id = token1Address.toHexString() + "-" + holder1.toHexString();
+const holder2Id = token1Address.toHexString() + "-" + holder2.toHexString();
 const zeroAddress = Address.fromString("0x0000000000000000000000000000000000000000");
+const zeroHolderId = token1Address.toHexString() + "-" + zeroAddress.toHexString();
 
 describe("Describe entity assertions for TokenHolding", () => {
   beforeEach(() => {
     clearStore();
     createAndStoreTestToken(token1Fixture);
-    createAndStoreTestToken(token2Fixture);
   })
 
   test("test mint token 1", () => {
@@ -55,4 +46,32 @@ describe("Describe entity assertions for TokenHolding", () => {
     assert.assertNotNull(token1Data);
     assert.bigIntEquals(token1Data!.totalSupply, totalSupply);
   })
+
+  test("test token holdings", () => {
+    const initialSupply = BigInt.fromString("10000000");
+    const event1 = createTransferEvent(token1Address, zeroAddress, holder1, initialSupply);
+    handleTokenTransfer(event1);
+    const transferAmount = BigInt.fromString("5000");
+    const event2 = createTransferEvent(token1Address, holder1, holder2, transferAmount);
+    handleTokenTransfer(event2);
+    const holding1 = TokenHolder.load(holder1Id)!;
+    assert.bigIntEquals(holding1.balance, initialSupply.minus(transferAmount));
+    const holding2 = TokenHolder.load(holder2Id)!;
+    assert.bigIntEquals(holding2.balance, transferAmount);
+  });
+
+  test("test burn token", () => {
+    const initialSupply = BigInt.fromString("10000000");
+    const event1 = createTransferEvent(token1Address, zeroAddress, holder1, initialSupply);
+    handleTokenTransfer(event1);
+    const burnAmount = BigInt.fromString("5000");
+    const event2 = createTransferEvent(token1Address, holder1, zeroAddress, burnAmount);
+    handleTokenTransfer(event2);
+    const holding1 = TokenHolder.load(holder1Id)!;
+    assert.bigIntEquals(holding1.balance, initialSupply.minus(burnAmount));
+    const zeroHolding = TokenHolder.load(zeroHolderId)!;
+    assert.bigIntEquals(zeroHolding.balance, burnAmount);
+    const token1Data = Token.load(token1Address.toHexString())!;
+    assert.bigIntEquals(token1Data!.totalSupply, initialSupply.minus(burnAmount));
+  });
 })
