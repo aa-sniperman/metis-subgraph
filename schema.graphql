@@ -24,4 +24,6 @@ type TokenHolder @entity {
   id: ID!                         # Unique address of the token and the holder
   balance: BigInt!                 # Balance of the token held by this address
   lastUpdated: BigInt!             # Timestamp of the last update
+  token: Bytes!
+  holder: Bytes!
 }

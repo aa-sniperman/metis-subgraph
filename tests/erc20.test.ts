@@ -4,55 +4,55 @@ import {
   test,
   clearStore,
   beforeAll,
-  afterAll
+  afterAll,
+  beforeEach
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleTokenCreation } from "../src/mappings/erc20"
+import { handleTokenHoldingChange, handleTokenTransfer } from "../src/mappings/erc20"
 import { createTransferEvent } from "./erc20-utils"
+import { createAndStoreTestToken, createAndStoreTestTokenHolding, TokenFixture } from "./constants"
+import { Token } from "../generated/schema"
 
-// Tests structure (matchstick-as >=0.5.0)
+// Test structure (matchstick-as >=0.5.0)
 // https://thegraph.com/docs/en/developer/matchstick/#tests-structure-0-5-0
 
-describe("Describe entity assertions", () => {
-  beforeAll(() => {
-    let from = Address.fromString("0x0000000000000000000000000000000000000000")
-    let to = Address.fromString(
-      "0x0000000000000000000000000000000000000001"
-    )
-    let value = BigInt.fromI32(234)
-    let event = createTransferEvent(from, to, value)
-    handleTokenCreation(event)
+const token1Address = Address.fromString("0x75cb093e4d61d2a2e65d8e0bbb01de8d89b53481")
+
+const token1Fixture: TokenFixture = {
+  address: "0x75cb093e4d61d2a2e65d8e0bbb01de8d89b53481",
+  symbol: "MCK",
+  name: "Mock Token",
+  totalSupply: "0",
+  decimals: "9"
+}
+
+const token2Address = Address.fromString("0xea32a96608495e54156ae48931a7c20f0dcc1a21")
+
+const token2Fixture: TokenFixture = {
+  address: '0xea32a96608495e54156ae48931a7c20f0dcc1a21',
+  symbol: "WRXDIE",
+  name: "Wrxdie on the mic",
+  totalSupply: "0",
+  decimals: "18"
+}
+
+const holder1 = Address.fromString("0xEB5491C015b73C3B86F4B4a7E8982d97eC4628ff");
+const holder2 = Address.fromString("0xA00a593B4160Fc26aF93Cf5bd88ab475228aaaC5");
+const zeroAddress = Address.fromString("0x0000000000000000000000000000000000000000");
+
+describe("Describe entity assertions for TokenHolding", () => {
+  beforeEach(() => {
+    clearStore();
+    createAndStoreTestToken(token1Fixture);
+    createAndStoreTestToken(token2Fixture);
   })
 
-  afterAll(() => {
-    clearStore()
+  test("test mint token 1", () => {
+    const totalSupply = BigInt.fromString("10000");
+    const event = createTransferEvent(token1Address, zeroAddress, holder1, totalSupply);
+    handleTokenTransfer(event);
+    const token1Data = Token.load(token1Address.toHexString());
+    assert.assertNotNull(token1Data);
+    assert.bigIntEquals(token1Data!.totalSupply, totalSupply);
   })
-
-  // For more test scenarios, see:
-  // https://thegraph.com/docs/en/developer/matchstick/#write-a-unit-test
-
-  test("Approval created and stored", () => {
-    assert.entityCount("TokenCreation", 1)
-  
-    // Adjust the ID here if necessary
-    assert.fieldEquals(
-      "TokenCreation",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a01000000",  // Match the actual ID generated
-      "tokenAddress",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a"
-    )
-    assert.fieldEquals(
-      "TokenCreation",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a01000000",
-      "recipient",
-      "0x0000000000000000000000000000000000000001"
-    )
-    assert.fieldEquals(
-      "TokenCreation",
-      "0xa16081f360e3847006db660bae1c6d1b2e17ec2a01000000",
-      "amount",
-      "234"
-    )
-  })
-  
 })

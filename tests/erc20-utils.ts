@@ -6,7 +6,9 @@ import {
   Transfer
 } from "../generated/ERC20/ERC20"
 
+// Create the Approval event with tokenAddress
 export function createApprovalEvent(
+  tokenAddress: Address,  // Added tokenAddress
   owner: Address,
   spender: Address,
   value: BigInt
@@ -15,6 +17,9 @@ export function createApprovalEvent(
 
   approvalEvent.parameters = new Array()
 
+  // Including tokenAddress as an additional parameter for each event
+  approvalEvent.address = tokenAddress
+  
   approvalEvent.parameters.push(
     new ethereum.EventParam("owner", ethereum.Value.fromAddress(owner))
   )
@@ -28,7 +33,9 @@ export function createApprovalEvent(
   return approvalEvent
 }
 
+// Create the OwnershipTransferred event with tokenAddress
 export function createOwnershipTransferredEvent(
+  tokenAddress: Address,  // Added tokenAddress
   previousOwner: Address,
   newOwner: Address
 ): OwnershipTransferred {
@@ -37,6 +44,9 @@ export function createOwnershipTransferredEvent(
   )
 
   ownershipTransferredEvent.parameters = new Array()
+
+  // Including tokenAddress as an additional parameter for each event
+  ownershipTransferredEvent.address = tokenAddress
 
   ownershipTransferredEvent.parameters.push(
     new ethereum.EventParam(
@@ -51,7 +61,9 @@ export function createOwnershipTransferredEvent(
   return ownershipTransferredEvent
 }
 
+// Create the Transfer event with tokenAddress
 export function createTransferEvent(
+  tokenAddress: Address,  // Added tokenAddress
   from: Address,
   to: Address,
   value: BigInt
@@ -59,6 +71,9 @@ export function createTransferEvent(
   let transferEvent = changetype<Transfer>(newMockEvent())
 
   transferEvent.parameters = new Array()
+
+  // Including tokenAddress as an additional parameter for each event
+  transferEvent.address = tokenAddress
 
   transferEvent.parameters.push(
     new ethereum.EventParam("from", ethereum.Value.fromAddress(from))
