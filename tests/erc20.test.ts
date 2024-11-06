@@ -7,7 +7,7 @@ import {
   afterAll
 } from "matchstick-as/assembly/index"
 import { Address, BigInt } from "@graphprotocol/graph-ts"
-import { handleTokenCreation } from "../src/erc20"
+import { handleTokenCreation } from "../src/mappings/erc20"
 import { createTransferEvent } from "./erc20-utils"
 
 // Tests structure (matchstick-as >=0.5.0)
