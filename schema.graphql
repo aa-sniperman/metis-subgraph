@@ -12,6 +12,7 @@ type TokenCreator @entity {
   id: ID!
   address: Bytes!
   ethBalance: BigInt!
+  nonce: BigInt!
 }
 
 type Token @entity {

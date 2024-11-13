@@ -6,7 +6,7 @@ import { Token, TokenCreation, TokenHolder } from "../../generated/schema";
 import { Address, BigInt, store } from "@graphprotocol/graph-ts";
 import { fetchTokenDecimals, fetchTokenName, fetchTokenSymbol, fetchTokenTotalSupply } from "../utils/token";
 import { getSubgraphConfig, SubgraphConfig } from "../utils/chains";
-import { fetchAndSaveTokenCreator } from "./wallet";
+import { fetchAndSaveTokenCreator } from "./token-creator";
 
 function fetchToken(tokenAddress: Address, subgraphConfig: SubgraphConfig = getSubgraphConfig()): Token | null {
   const tokenOverrides = subgraphConfig.tokenOverrides;
@@ -59,7 +59,7 @@ export function handleTokenCreation(event: TransferEvent): void {
     populateNewToken(tokenAddress);
     
     const creatorAddress = event.transaction.from;
-    const creator = fetchAndSaveTokenCreator(tokenAddress, creatorAddress);
+    const creator = fetchAndSaveTokenCreator(event);
     let tokenCreation = new TokenCreation(event.transaction.hash.concatI32(event.logIndex.toI32()));
     tokenCreation.tokenAddress = event.address;
     tokenCreation.recipient = event.params.to;
