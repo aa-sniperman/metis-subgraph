@@ -1,10 +1,17 @@
 type TokenCreation @entity {
   id: Bytes!
   tokenAddress: Bytes!
+  creator: TokenCreator
   recipient: Bytes!
   amount: BigInt!
   timestamp: BigInt!
   transactionHash: Bytes!
+}
+
+type TokenCreator @entity {
+  id: ID!
+  address: Bytes!
+  ethBalance: BigInt!
 }
 
 type Token @entity {
