@@ -90,3 +90,7 @@ export function fetchTokenDecimals(tokenAddress: Address, tokenOverrides: Static
 
   return null
 }
+
+export const backlistedTokens = [
+  '0x5d425630796346f7d054c97753ae241fc592734b' // Merky bridge tokenss
+]
